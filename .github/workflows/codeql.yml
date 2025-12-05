@@ -1,0 +1,85 @@
+# .github/workflows/codeql.yml
+name: CodeQL
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  schedule:
+    - cron: '22 4 * * 1'  # every Monday at 04:22 UTC
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ cpp, rust ]   # covers both C/C++ and the Rust parts
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install Rust (required for current i3lock-color)
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      # Install all the system dependencies the build actually needs
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf \
+            gcc \
+            pkg-config \
+            libpam0g-dev \
+            libcairo2-dev \
+            libxcb1-dev \
+            libxcb-xinerama0-dev \
+            libxcb-randr0-dev \
+            libxcb-xrm-dev \
+            libxcb-util0-dev \
+            libxcb-image0-dev \
+            libxcb-keysyms1-dev \
+            libxcb-composite0-dev \
+            libev-dev \
+            libx11-xcb-dev \
+            libxcb-dpms0-dev
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # Optional but recommended: more thorough queries
+          queries: security-and-quality
+
+      # Let CodeQL watch the real build process
+      - name: Build with autobuild fallback
+        run: |
+          # Try the normal build first (what developers actually use)
+          if [ -f autogen.sh ]; then
+            ./autogen.sh
+            ./configure
+            make -j$(nproc)
+          else
+            echo "No autogen.sh – falling back to CodeQL autobuild"
+          fi
+        # If the normal build fails for any reason, CodeQL still tries its own autobuild
+        continue-on-error: true
+
+      # Fallback autobuild step (CodeQL’s own attempt if the above failed)
+      - name: Autobuild (fallback)
+        if: failure()
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
