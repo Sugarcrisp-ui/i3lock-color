@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ cpp ]  # Only C/C++ – no Rust in this repository
+        language: [ cpp ]  # Only C/C++ – no Rust
 
     steps:
       - name: Checkout repository
@@ -54,27 +54,14 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          # Optional but recommended: more thorough queries
           queries: security-and-quality
 
-      # Let CodeQL watch the real build process
-      - name: Build with autobuild fallback
+      # Explicitly build the project (CodeQL traces the compilation)
+      - name: Build project
         run: |
-          # Try the normal build first (what developers actually use)
-          if [ -f autogen.sh ]; then
-            ./autogen.sh
-            ./configure
-            make -j$(nproc)
-          else
-            echo "No autogen.sh – falling back to CodeQL autobuild"
-          fi
-        # If the normal build fails for any reason, CodeQL still tries its own autobuild
-        continue-on-error: true
-
-      # Fallback autobuild step (CodeQL’s own attempt if the above failed)
-      - name: Autobuild (fallback)
-        if: failure()
-        uses: github/codeql-action/autobuild@v3
+          ./autogen.sh
+          ./configure
+          make -j$(nproc)
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
