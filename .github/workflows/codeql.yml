@@ -21,18 +21,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ cpp ]  # Only C/C++ – no Rust
+        language: [ cpp ]  # Only C/C++
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install all the system dependencies the build actually needs
+      # Install build dependencies (including autoreconf)
       - name: Install build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
             autoconf \
+            automake \
+            autotools-dev \
             gcc \
             pkg-config \
             libpam0g-dev \
@@ -48,7 +50,7 @@ jobs:
             libev-dev \
             libx11-xcb-dev \
             libxcb-dpms0-dev \
-            libgif-dev  # Required for GIF support
+            libgif-dev
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -56,10 +58,12 @@ jobs:
           languages: ${{ matrix.language }}
           queries: security-and-quality
 
-      # Explicitly build the project (CodeQL traces the compilation)
+      # Reliable build step for autotools projects
       - name: Build project
         run: |
-          ./autogen.sh
+          # Generate configure if needed (works even if autogen.sh exists)
+          autoreconf --install --force
+          
           ./configure
           make -j$(nproc)
 
