@@ -27,7 +27,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install build dependencies (including autoreconf)
+      # Install build dependencies (including the ones needed for autoreconf and XKB)
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -50,7 +50,8 @@ jobs:
             libev-dev \
             libx11-xcb-dev \
             libxcb-dpms0-dev \
-            libgif-dev
+            libgif-dev \
+            libxcb-xkb-dev   # ← This was the missing one!
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -58,12 +59,10 @@ jobs:
           languages: ${{ matrix.language }}
           queries: security-and-quality
 
-      # Reliable build step for autotools projects
+      # Reliable build for autotools projects (generates configure if needed)
       - name: Build project
         run: |
-          # Generate configure if needed (works even if autogen.sh exists)
           autoreconf --install --force
-          
           ./configure
           make -j$(nproc)
 
