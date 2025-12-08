@@ -27,8 +27,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install build dependencies
-      - name: Install build dependencies
+      # Install build dependencies (split into two steps so we can see exactly which package fails)
+      - name: Install build dependencies (core)
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -44,13 +44,17 @@ jobs:
             libxcb-xinerama0-dev \
             libxcb-randr0-dev \
             libxcb-xrm-dev \
-            libxcb-util-dev \      # ← fixed: was libxcb-util0-dev
+            libxcb-util-dev \
             libxcb-image0-dev \
             libxcb-keysyms1-dev \
             libxcb-composite0-dev \
             libev-dev \
             libx11-xcb-dev \
-            libxcb-dpms0-dev \
+            libxcb-dpms0-dev
+
+      - name: Install build dependencies (extra for GIF/JPEG/XKB)
+        run: |
+          sudo apt-get install -y \
             libgif-dev \
             libjpeg-dev \
             libxcb-xkb-dev \
