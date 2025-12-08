@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [ master, main ]
   schedule:
-    - cron: '22 4 * * 1'  # every Monday at 04:22 UTC
+    - cron: '22 4 * * 1' # every Monday at 04:22 UTC
 
 jobs:
   analyze:
@@ -21,17 +21,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ cpp ]
+        language: [ cpp ]  # Only C/C++ – no Rust in this repository
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # Install Rust (required for current i3lock-color)
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
 
       # Install all the system dependencies the build actually needs
       - name: Install build dependencies
@@ -53,7 +47,8 @@ jobs:
             libxcb-composite0-dev \
             libev-dev \
             libx11-xcb-dev \
-            libxcb-dpms0-dev
+            libxcb-dpms0-dev \
+            libgif-dev  # Required for GIF support
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
