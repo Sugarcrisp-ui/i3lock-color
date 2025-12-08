@@ -39,11 +39,12 @@ jobs:
             pkg-config \
             libpam0g-dev \
             libcairo2-dev \
+            libfontconfig1-dev \
             libxcb1-dev \
             libxcb-xinerama0-dev \
             libxcb-randr0-dev \
             libxcb-xrm-dev \
-            libxcb-util0-dev \
+            libxcb-util-dev \      # ← fixed: was libxcb-util0-dev
             libxcb-image0-dev \
             libxcb-keysyms1-dev \
             libxcb-composite0-dev \
@@ -51,9 +52,10 @@ jobs:
             libx11-xcb-dev \
             libxcb-dpms0-dev \
             libgif-dev \
+            libjpeg-dev \
             libxcb-xkb-dev \
-            libxkbcommon-dev \      # ← new
-            libxkbcommon-x11-dev   # ← new
+            libxkbcommon-dev \
+            libxkbcommon-x11-dev
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
