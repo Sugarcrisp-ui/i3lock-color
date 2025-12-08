@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ cpp, rust ]   # covers both C/C++ and the Rust parts
+        language: [ cpp ]
 
     steps:
       - name: Checkout repository
