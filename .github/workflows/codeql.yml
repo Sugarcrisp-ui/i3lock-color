@@ -27,8 +27,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install build dependencies (split into two steps so we can see exactly which package fails)
-      - name: Install build dependencies (core)
+      - name: Install build dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -50,11 +49,7 @@ jobs:
             libxcb-composite0-dev \
             libev-dev \
             libx11-xcb-dev \
-            libxcb-dpms0-dev
-
-      - name: Install build dependencies (extra for GIF/JPEG/XKB)
-        run: |
-          sudo apt-get install -y \
+            libxcb-dpms0-dev \
             libgif-dev \
             libjpeg-dev \
             libxcb-xkb-dev \
@@ -67,7 +62,6 @@ jobs:
           languages: ${{ matrix.language }}
           queries: security-and-quality
 
-      # Reliable build for autotools projects
       - name: Build project
         run: |
           autoreconf --install --force
